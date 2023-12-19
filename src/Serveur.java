@@ -23,14 +23,4 @@ public class Serveur {
         }
     }
 
-    public void fermerServeurSocket(){
-        try {
-            if(serverSocket != null){
-                serverSocket.close();
-            }
-        } catch (IOException e) {
-           e.printStackTrace();
-        }
-    }
-
 }
