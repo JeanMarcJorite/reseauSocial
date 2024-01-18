@@ -32,14 +32,14 @@ public class Client{
         String nomUtil = this.nomUtilisateur;
         boolean nameVerified = false;
         while (!nameVerified) {
-            System.out.println("Enter your username : ");
+            System.out.println("Entrer votre pseudo : ");
             nomUtil = sc.nextLine();
             this.out.write(nomUtil);
             this.out.newLine();
             this.out.flush();
             String msg = this.in.readLine();
             System.out.println(msg);
-            if (!msg.equals("This name is already taken, please choose another name")) {
+            if (!msg.equals("Ce pseudo est deja pris, veuillez en choisir un autre")) {
             nameVerified = true;
             }
         }

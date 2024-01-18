@@ -49,7 +49,7 @@ public class ClientHandler extends Thread {
         }
       }
     } catch (IOException | NullPointerException e) {
-      System.out.println("Client disconnected");
+      System.out.println("Client déconnecté");
       this.clientThreads.remove(this.clientSocket);
     }
   }
@@ -174,12 +174,12 @@ public class ClientHandler extends Thread {
 
 
     else if (message.equals("/help")) {
-      this.sendCommandMessage("Commands list: @<username> <message>, /quit, /nbusers, /users, /uptime, /help");
+      this.sendCommandMessage("Commandes liste: @<username> <message>, /quit, /nbusers, /users, /uptime, /help");
     }
 
 
     else {
-      this.sendCommandMessage("Unknown command");
+      this.sendCommandMessage("Commande inconnue");
     }
 
 
@@ -206,7 +206,7 @@ public class ClientHandler extends Thread {
       }
     }
     if (cpt == 0) {
-      this.sendCommandMessage("User not found");
+      this.sendCommandMessage("Utilisateur non trouvé");
     }
   }
 }

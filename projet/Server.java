@@ -13,7 +13,7 @@ public class Server {
 
     public ServerSocket start(int port) throws IOException {
       ServerSocket serverSocket = new ServerSocket(port);
-      System.out.println("Server started on port " + port);
+      System.out.println("Serveur lancer sur le port : " + port);
       return serverSocket;
     }
 
@@ -31,9 +31,9 @@ public class Server {
 
                 // verify the name
                 boolean nameVerified = verificationName(name, clientSocket, server.clientThreads);
-                System.out.println("nameVerified: " + nameVerified);
+                System.out.println("pseudo vérifie: " + nameVerified);
                 if (!nameVerified) {
-                  out.write("This name is already taken, please choose another name");
+                  out.write("Ce pseudo est deja pris, veuillez en choisir un autre");
                   out.newLine();
                   out.flush();
                 }
@@ -42,7 +42,7 @@ public class Server {
                   name = in.readLine();
                   nameVerified = verificationName(name, clientSocket, server.clientThreads);
                   if (!nameVerified) {
-                    out.write("This name is already taken, please choose another name");
+                    out.write("Ce pseudo est deja pris, veuillez en choisir un autre");
                     out.newLine();
                     out.flush();
                   }
@@ -51,7 +51,7 @@ public class Server {
                   }
                 }
 
-                out.write("You are connected as " + name);
+                out.write("Tu es connecte en tant que " + name);
                 out.newLine();
                 out.flush();
 
