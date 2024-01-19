@@ -10,7 +10,7 @@ public class ClientHandler extends Thread {
   private BufferedWriter out;
   private Map<Socket, ClientHandler> clientThreads;
   private Map<ClientHandler,ArrayList<ClientHandler>> jeFollow;
-  private ArrayList<Client> meFollow;
+  private ArrayList<ClientHandler> meFollow;
 
 
   public ClientHandler(String username, Socket clientSocket, Map<Socket, ClientHandler> clientThreads) throws IOException {
@@ -21,6 +21,22 @@ public class ClientHandler extends Thread {
     this.out = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
     this.jeFollow = new HashMap<>();
     this.meFollow = new ArrayList<>();
+  }
+
+
+  public ClientHandler monInstance() {
+    ClientHandler moi = null; 
+    for (ClientHandler thread : clientThreads.values()) {
+        if (thread.getUserName().equals(this.username)) {
+            moi = thread;
+            break; 
+        }
+    }
+    return moi;
+}
+
+  public void ajoutMeFollow(ClientHandler cli){
+    this.meFollow.add(cli);
   }
 
   public String getNomUtilisateur() {
@@ -95,6 +111,9 @@ public class ClientHandler extends Thread {
       if (parts.length > 1) {
           String userToFollow = parts[1];
           for (ClientHandler thread : clientThreads.values()) {
+
+            
+
               if (thread.getUserName().equals(userToFollow)) {
                   ArrayList<ClientHandler> following = jeFollow.get(this);
                   if (following == null) {
@@ -102,7 +121,9 @@ public class ClientHandler extends Thread {
                   }
                   following.add(thread);
                   jeFollow.put(this, following);
+                  thread.ajoutMeFollow(monInstance());
                   this.sendCommandMessage("Vous suivez maintenant " + userToFollow);
+
                   return;
               }
           }
@@ -137,6 +158,26 @@ public class ClientHandler extends Thread {
       this.sendCommandMessage("Liste des utilisateurs connectés: " + users);
     }
 
+    else if(command.equals("/unfollow")){
+      if (parts.length > 1) {
+        String userToUnfollow = parts[1];
+        for (ClientHandler thread : clientThreads.values()) {
+            if (thread.getUserName().equals(userToUnfollow)) {
+                ArrayList<ClientHandler> following = jeFollow.get(this);
+                if (following != null) {
+                    following.remove(thread);
+                    thread.meFollow.remove(monInstance());
+                    this.sendCommandMessage("Vous ne suivez plus " + userToUnfollow);
+                    return;
+                }
+            }
+        }
+        this.sendCommandMessage("Utilisateur non trouvé");
+
+      }
+
+    }
+
 
 
 
@@ -151,7 +192,7 @@ public class ClientHandler extends Thread {
 
     else if (message.equals("/followedlist")) {
       String users = "";
-      for (Client c : this.meFollow) {
+      for (ClientHandler c : this.meFollow) {
         users += c.getNomUtilisateur() + " ";
       }
       this.sendCommandMessage("Liste des utilisateurs qui vous suivent: " + users);
@@ -167,10 +208,6 @@ public class ClientHandler extends Thread {
     }
     this.sendCommandMessage("Vous suivez : " + users);
 }
-
-    else if (message.equals("/uptime")) {
-      this.sendCommandMessage("Le serveur est en ligne depuis " + System.currentTimeMillis() + " ms");
-    }
 
 
     else if (message.equals("/help")) {

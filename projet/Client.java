@@ -70,7 +70,6 @@ public class Client{
                 this.out.newLine();
                 this.out.flush();
                 if (mess.equals("/quit")) {
-                    // this.quitServer();
                     break;
                 }
             }
