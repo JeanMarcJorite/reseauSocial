@@ -1,5 +1,8 @@
 # Manuel d'utilisation
 
+Développeur 1 : Selim HANI 2.1A
+Développeur 2 : Jean-marc JORITE 2.1A
+
 ## Lancement
 Pour lancer l'application, il faut d'abord ouvrir 2 terminaux, ensuite lancer dans le 1er terminal le fichier serveur.sh puis dans le second lancer le fichier client.sh Vous pouvez lancer autant de clients que vous voulez.
 
