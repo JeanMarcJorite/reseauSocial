@@ -1,6 +1,8 @@
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.concurrent.*;
+
 
 
 public class ClientHandler extends Thread {
@@ -11,8 +13,17 @@ public class ClientHandler extends Thread {
   private Map<Socket, ClientHandler> clientThreads;
   private Map<ClientHandler,ArrayList<ClientHandler>> jeFollow;
   private ArrayList<ClientHandler> meFollow;
+  private boolean fil = false;
 
 
+
+  /**
+ * Constructeur de la classe ClientHandler.
+ * @param username Le nom d'utilisateur du client.
+ * @param clientSocket Le socket du client.
+ * @param clientThreads La liste des threads clients.
+ * @throws IOException Si une erreur d'entrée/sortie se produit.
+ */
   public ClientHandler(String username, Socket clientSocket, Map<Socket, ClientHandler> clientThreads) throws IOException {
     this.username = username;
     this.clientSocket = clientSocket;
@@ -23,7 +34,10 @@ public class ClientHandler extends Thread {
     this.meFollow = new ArrayList<>();
   }
 
-
+/**
+ * Récupère l'instance de ClientHandler pour l'utilisateur actuel.
+ * @return L'instance de ClientHandler pour l'utilisateur actuel.
+ */
   public ClientHandler monInstance() {
     ClientHandler moi = null; 
     for (ClientHandler thread : clientThreads.values()) {
@@ -35,20 +49,43 @@ public class ClientHandler extends Thread {
     return moi;
 }
 
+/**
+ * Ajoute un client à la liste des clients que l'utilisateur actuel suit.
+ * @param cli Le client à suivre.
+ */
   public void ajoutMeFollow(ClientHandler cli){
     this.meFollow.add(cli);
   }
 
+
+
+/**
+ * Récupère le nom d'utilisateur du client.
+ * @return Le nom d'utilisateur du client.
+ */
   public String getNomUtilisateur() {
     return this.username;
   }
 
+/**
+ * Exécute le thread du client.
+ */
   public void run() {
     try {
       while (true) {
 
         String message = this.in.readLine();
         System.out.println(this.username + " : " + message);
+
+        if (fil) {
+          if (message.startsWith("/retour")) {
+              fil = false;}
+        }
+          else{
+            if (message.startsWith("/fil")) {
+              fil = true;
+          }
+        }
 
         if (message.startsWith("/")) {
           this.getCommand(message);
@@ -58,7 +95,7 @@ public class ClientHandler extends Thread {
         }
         else {
           for (ClientHandler thread : clientThreads.values()) {
-            if (thread != this) {
+            if (thread != this && fil==false) {
               thread.sendMessage(this.username, message);
             }
           }
@@ -70,20 +107,39 @@ public class ClientHandler extends Thread {
     }
   }
 
+
+
+
+/**
+ * Récupère le nom d'utilisateur du client.
+ * @return Le nom d'utilisateur du client.
+ */
   public String getUserName() {
     return this.username;
   }
 
+  /**
+ * Envoie un message à l'utilisateur.
+ * @param userName Le nom d'utilisateur qui envoie le message.
+ * @param message Le message à envoyer.
+ */
   public void sendMessage(String userName, String message) {
-    try {
-      out.write(userName + " : " + message);
-      out.newLine();
-      out.flush();
-    } catch (IOException e) {
-      e.printStackTrace();
+    if(this.fil==false){
+      try {
+        out.write(userName + " : " + message);
+        out.newLine();
+        out.flush();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
     }
   }
 
+
+  /**
+ * Envoie un message de commande à l'utilisateur.
+ * @param message Le message de commande à envoyer.
+ */
   public void sendCommandMessage(String message) {
     try {
       out.write(message);
@@ -94,6 +150,10 @@ public class ClientHandler extends Thread {
     }
   }
 
+  /**
+ * Traite une commande reçue.
+ * @param message La commande à traiter.
+ */
   public void getCommand(String message) {
     String[] parts = message.split(" ");
     String command = parts[0];
@@ -107,7 +167,7 @@ public class ClientHandler extends Thread {
       }
     }
 
-    else if (command.equals("/suivre")) {
+    else if (command.equals("/follow")) {
       if (parts.length > 1) {
           String userToFollow = parts[1];
           for (ClientHandler thread : clientThreads.values()) {
@@ -172,7 +232,7 @@ public class ClientHandler extends Thread {
                 }
             }
         }
-        this.sendCommandMessage("Utilisateur non trouvé");
+        this.sendCommandMessage("Utilisateur non trouvé dans vos abonnements");
 
       }
 
@@ -182,11 +242,11 @@ public class ClientHandler extends Thread {
 
 
 
-    else if (message.equals("/follow")) {
+    else if (message.equals("/nbfollow")) {
       this.sendCommandMessage("Vous suivez " + this.jeFollow.size() + " utilisateurs");
     }
 
-    else if (message.equals("/followed")) {
+    else if (message.equals("/nbfollowed")) {
       this.sendCommandMessage("Vous êtes suivi par " + this.meFollow.size() + " utilisateurs");
     }
 
@@ -211,8 +271,140 @@ public class ClientHandler extends Thread {
 
 
     else if (message.equals("/help")) {
-      this.sendCommandMessage("Commandes liste: @<username> <message>, /quit, /nbusers, /users, /uptime, /help");
+      this.sendCommandMessage("Liste des commandes et leur utilitée: \n @<pseudo> <message> : Envoyer un message privée à un utilisateur \n /follow pseudo : Pour s'abonner à quelqu'un  \n /nbusers : Pour voir le nombre d'utilisateurs connectées \n /users : Pour voir le nom des utilisateurs connectés  \n /followlist : Pour voir les utilisateurs que je follow \n /followedlist : Pour voir les utilisateurs qui me follow \n /nbfollowed : Pour voir le nombre d'utilisateurs qui me follow \n /nbfollow : Pour voir le nombre d'utilisateurs que je follow \n /unfollow pseudo : Pour ne plus suivre quelqu'un \n /fil : Pour acceder aux tweets \n /retour : Pour quitter l'espace tweet \n /jaime id : pour aimer un tweet \n /jaimepas id : pour retirer le j'aime d'un tweet \n /delete id : pour supprimer son tweet \n /quit : Se déconnecter  \n /help : Pour revoir les commandes \n");
     }
+
+
+
+
+
+
+
+
+
+    ////////////////////////////////////////////////////
+
+    else if (message.startsWith("/tweet")) {
+      int maxId = 0;
+      for(Tweet tweet : ServeurData.tweets) {
+        if (tweet.getId() > maxId) {
+            maxId = tweet.getId();
+        }
+        maxId++;
+      }
+
+      String tweetContent = message.substring(7);
+      Tweet newTweet = new Tweet(maxId, tweetContent,this.username);
+      ServeurData.tweets.add(newTweet);
+  }
+
+
+
+  else if (message.equals("/fil")) {
+    this.fil= true;
+    this.sendCommandMessage("Vous êtes maintenant dans le fil d'actualité, vous avez quitter le chat générale  \n");
+    ScheduledFuture<?> refresh = ServeurData.executor.scheduleAtFixedRate(new Runnable() {
+    private int lastTweetIndex = 0;
+
+        @Override
+        public void run() {
+            if (message.equals("/fil")) {
+                String feed = "";
+                for (int i = lastTweetIndex; i < ServeurData.tweets.size(); i++) {
+                    Tweet tweet = ServeurData.tweets.get(i);
+                    feed += "id : " +tweet.getId() + "\npseudo : " + tweet.getUsername() + " :  \n" + tweet.getText() + " (" + tweet.getLikes() + " likes)";
+                    feed+= "\n -----------------------------------\n";
+                }
+                if (!feed.isEmpty()) {
+                    sendCommandMessage(feed);
+                }
+                lastTweetIndex = ServeurData.tweets.size();
+            }
+        }
+    }, 0, 2, TimeUnit.SECONDS);
+  }
+
+  else if (command.equals("/jaime")) {
+    if (parts.length > 1) {
+        try {
+            int tweetId = Integer.parseInt(parts[1]);
+            for (Tweet tweet : ServeurData.tweets) {
+                if (tweet.getId() == tweetId) {
+                    tweet.addLike();
+                    this.sendCommandMessage("Vous avez aimé le tweet " + tweetId);
+                    return;
+                }
+            }
+            this.sendCommandMessage("Tweet non trouvé");
+        } catch (NumberFormatException e) {
+            this.sendCommandMessage("ID de tweet invalide");
+        }
+    }
+  }
+
+  else if (command.equals("/jaimepas")) {
+    if (parts.length > 1) {
+        try {
+            int tweetId = Integer.parseInt(parts[1]);
+            for (Tweet tweet : ServeurData.tweets) {
+                if (tweet.getId() == tweetId) {
+                    tweet.removeLike();
+                    this.sendCommandMessage("Vous avez enlevé votre 'like' du tweet " + tweetId);
+                    return;
+                }
+            }
+            this.sendCommandMessage("Tweet non trouvé");
+        } catch (NumberFormatException e) {
+            this.sendCommandMessage("ID de tweet invalide");
+        }
+    }
+  }
+  else if (command.equals("/delete")) {
+    if (parts.length > 1) {
+        try {
+            int tweetId = Integer.parseInt(parts[1]);
+            Iterator<Tweet> iterator = ServeurData.tweets.iterator();
+            while (iterator.hasNext()) {
+                Tweet tweet = iterator.next();
+                if (tweet.getId() == tweetId && tweet.getUsername().equals(this.username) || this.username.equals("admin")) {
+                    iterator.remove();
+                    this.sendCommandMessage("Vous avez supprimé le tweet " + tweetId);
+                    return;
+                }
+            }
+            this.sendCommandMessage("Tweet non trouvé ou vous n'êtes pas l'auteur du tweet");
+        } catch (NumberFormatException e) {
+            this.sendCommandMessage("ID de tweet invalide");
+        }
+    }
+  }
+  else if (command.equals("/retour")) {
+    this.fil = false;
+    this.sendCommandMessage("Vous avez quitté le fil d'actualité ");
+    this.sendCommandMessage("\n Bienvenue sur le chat Général, endroit ou tu peux discuter avec tout le monde \n ");
+  }
+  else if (command.startsWith("/remove")) {
+    String username = command.substring(6);
+    if(this.username.equals("admin")) {
+        Iterator<Map.Entry<Socket, ClientHandler>> iterator = clientThreads.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<Socket, ClientHandler> entry = iterator.next();
+            if (entry.getValue().getUserName().equals(username)) {
+                iterator.remove();
+                System.out.println("L'utilisateur " + username + " a ete supprime de la liste des utilisateurs connectes");
+                return;
+            }
+        }
+    }
+}
+
+
+  
+
+
+
+
+
 
 
     else {
@@ -226,8 +418,16 @@ public class ClientHandler extends Thread {
 
 
 
+
+
+
   }
 
+  /**
+ * Envoie un message privé à un autre utilisateur.
+ * @param userName Le nom d'utilisateur qui envoie le message.
+ * @param message Le message à envoyer.
+ */
   public void sendPrivateMessage(String userName, String message) {
     String[] parts = message.split(" ");
     String user = parts[0].substring(1);
@@ -246,4 +446,8 @@ public class ClientHandler extends Thread {
       this.sendCommandMessage("Utilisateur non trouvé");
     }
   }
+
+
+
+  
 }
