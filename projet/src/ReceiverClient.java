@@ -6,9 +6,6 @@ import java.io.*;
 
 public class ReceiverClient implements Runnable {
 
-
-  public static final String ANSI_RESET = "\u001B[0m";
-  public static final String ANSI_RED = "\u001B[31m";
   private boolean inFeedMode = false;
   
   private BufferedReader in;
@@ -33,9 +30,6 @@ public class ReceiverClient implements Runnable {
           break;
         }
         else {
-          if (msg.contains("[MP]")) {
-            System.out.println(ANSI_RED + msg + ANSI_RESET);
-          }
           if (msg.startsWith("/fil")) {
             inFeedMode = true;
             continue;

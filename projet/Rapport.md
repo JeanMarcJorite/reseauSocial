@@ -13,4 +13,4 @@ Pour les tweets une fois dans le /fil il y a une actualisation toute les 2 secon
 ## Problème rencontrée 
 Au cours de cette SAE nous avons rencontré de nombreux problèmes de taille,  
 nous n'avons pas réussi à sauvegarder les données du serveur car des que nous utilisons un .jar pour importe un module JSON on ne pouvait plus compiler nos fichiers car le .jar n'était pas accessible, alors que nous l'avons mis dans un dossier lib et ajoute dans le classPath le fichier .jar .  
-Nous avons donc décidé de ne pas perdre plus de temps dessus et faire plus de fonctionnalité pour compensé le fait que nous n'avons point réussi à sauvegarder les données du serveur.
+Nous avons donc décidé de ne pas perdre plus de temps dessus et faire plus de fonctionnalité pour compensé le fait que nous n'avons point réussi à sauvegarder les données du serveur. Mais avec une semaine de plus on aurait put régler et géres plus d'excéptions.

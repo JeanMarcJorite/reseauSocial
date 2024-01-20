@@ -73,4 +73,14 @@ Se déconnecter
 Pour voir les commandes
 
 
+## Commande admin
+
+Pour avoir les commandes admin vous devez vous connecté avec le pseudo : admin
+
+
+- #### /delete id
+
+Pour supprimer un tweet 
+
+
 
