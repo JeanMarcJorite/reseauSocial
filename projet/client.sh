@@ -1,4 +1,2 @@
-cd src
-javac -cp "../lib" *.java
-cd ..
-java -cp "bin" Client
+#!/bin/bash
+java -cp bin src.Client

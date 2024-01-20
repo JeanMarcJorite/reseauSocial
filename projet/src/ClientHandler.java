@@ -305,7 +305,7 @@ public class ClientHandler extends Thread {
   else if (message.equals("/fil")) {
     this.fil= true;
     this.sendCommandMessage("Vous êtes maintenant dans le fil d'actualité, vous avez quitter le chat générale  \n");
-    ScheduledFuture<?> refresh = ServeurData.executor.scheduleAtFixedRate(new Runnable() {
+    ServeurData.executor.scheduleAtFixedRate(new Runnable() {
     private int lastTweetIndex = 0;
 
         @Override
